@@ -18,13 +18,17 @@ class MyPlugin(BasePlugin):
 
         def replace_with_fetched_content(match):
             uri = match.group(1)
-            try:
-                response = requests.get(uri, timeout=5)
-                if response.status_code == 200:
-                    return f"{response.text}"
-                else:
-                    return f"**Error fetching URI ({response.status_code})**"
-            except requests.exceptions.RequestException as e:
-                return f"**Error fetching URI: {e}**"
+            if "http" in uri:
+                try:
+                    response = requests.get(uri, timeout=5)
+                    if response.status_code == 200:
+                        return f"{response.text}"
+                    else:
+                        return f"**Error fetching URI ({response.status_code})**"
+                except requests.exceptions.RequestException as e:
+                    return f"**Error fetching URI: {e}**"
+            else:
+                with open(uri, 'r') as f:
+                    return f.read()
 
         return re.sub(pattern, replace_with_fetched_content, markdown)
